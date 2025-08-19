@@ -17,6 +17,7 @@ import RequiredLabelIcon from "@/components/RequiredLabelIcon";
 import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
 import { createCourse } from "../actions/courses";
+import { toast } from "sonner";
 
 const CourseForm = () => {
   const form = useForm<CourseSchemaType>({
@@ -27,8 +28,9 @@ const CourseForm = () => {
     },
   });
 
-  function onSubmit(values: CourseSchemaType) {
-    const data = createCourse(values);
+  async function onSubmit(values: CourseSchemaType) {
+    const data = await createCourse(values);
+    toast.success(data.message);
   }
 
   return (
