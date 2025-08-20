@@ -16,21 +16,31 @@ import { Input } from "@/components/ui/input";
 import RequiredLabelIcon from "@/components/RequiredLabelIcon";
 import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
-import { createCourse } from "../actions/courses";
+import { createCourse, updateCourse } from "../actions/courses";
 import { toast } from "sonner";
 
-const CourseForm = () => {
+const CourseForm = ({
+  course,
+}: {
+  course?: {
+    id: string;
+    title: string;
+    description: string;
+  };
+}) => {
   const form = useForm<CourseSchemaType>({
     resolver: zodResolver(courseSchema),
-    defaultValues: {
+    defaultValues: course ?? {
       title: "",
       description: "",
     },
   });
 
   async function onSubmit(values: CourseSchemaType) {
-    const data = await createCourse(values);
-    toast.success(data.message);
+    const action = course ? updateCourse.bind(null, course.id) : createCourse;
+
+    const data = await action(values);
+    toast.success(data?.message);
   }
 
   return (

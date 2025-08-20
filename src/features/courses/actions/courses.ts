@@ -3,8 +3,12 @@
 import { redirect } from "next/navigation";
 import { courseSchema, CourseSchemaType } from "../schemas/courses";
 import { getCurrentUser } from "@/services/clerk";
-import { canCreateCourse, canDeleteCourse } from "../permissions/courses";
-import { insertCourse } from "../db/courses";
+import {
+  canCreateCourse,
+  canDeleteCourse,
+  canUpdateCourse,
+} from "../permissions/courses";
+import { insertCourse, deleteCourseDB, updateCourseDB } from "../db/courses";
 
 export async function createCourse(unsafeData: CourseSchemaType) {
   const { success, data } = courseSchema.safeParse(unsafeData);
@@ -20,6 +24,19 @@ export async function createCourse(unsafeData: CourseSchemaType) {
   redirect(`/admin/courses/${course.id}/edit`);
 }
 
+export async function updateCourse(id: string, unsafeData: CourseSchemaType) {
+  const { success, data } = courseSchema.safeParse(unsafeData);
+
+  if (!success || !canUpdateCourse(await getCurrentUser())) {
+    return {
+      error: true,
+      message: "There was an error updating your course",
+    };
+  }
+
+  const course = await updateCourseDB(id, data);
+}
+
 export async function deleteCourse(id: string) {
   if (!canDeleteCourse(await getCurrentUser())) {
     return {
@@ -28,7 +45,7 @@ export async function deleteCourse(id: string) {
     };
   }
 
-  await deleteCourse(id);
+  await deleteCourseDB(id);
   return {
     error: false,
     message: "Course deleted successfully",
